@@ -63,7 +63,7 @@ static char iface[PROPERTY_VALUE_MAX];
 #define WIFI_TEST_INTERFACE		"sta"
 
 #define WIFI_DRIVER_LOADER_DELAY	1000000
-#define WPA_SETUP_DELAY	           	2000000
+#define WPA_SETUP_DELAY			1000000
 
 static const char IFACE_DIR[]           = "/data/system/wpa_supplicant";
 static const char DRIVER_MODULE_NAME[]  = WIFI_DRIVER_MODULE_NAME;
@@ -363,6 +363,7 @@ int wifi_connect_to_supplicant()
 {
     char ifname[256];
     char supp_status[PROPERTY_VALUE_MAX] = {'\0'};
+    int count = 10; /* wait at most 10 seconds for completion */
 
     /* Make sure supplicant is running */
     if (!property_get(SUPP_PROP_NAME, supp_status, NULL)
@@ -378,13 +379,12 @@ int wifi_connect_to_supplicant()
     } else {
         strlcpy(ifname, iface, sizeof(ifname));
     }
-
-    ctrl_conn = wpa_ctrl_open(ifname);
-    if(ctrl_conn == NULL) {
-        LOGE("Unable to open connection to supplicant on \"%s\": %s ,lets try again",
-             ifname, strerror(errno));
-    usleep(WPA_SETUP_DELAY);
-    ctrl_conn = wpa_ctrl_open(ifname);
+    /* Since supplicant is running wait for interface to be created */
+    while (count-- > 0) {
+	ctrl_conn = wpa_ctrl_open(ifname);
+	if (ctrl_conn != NULL)
+		break;
+	usleep(WPA_SETUP_DELAY);
     }
     if (ctrl_conn == NULL) {
         LOGE("Unable to open connection to supplicant on \"%s\": %s",
