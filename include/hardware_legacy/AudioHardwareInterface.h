@@ -131,7 +131,27 @@ public:
     /**
      * return the frame size (number of bytes per sample).
      */
-    uint32_t    frameSize() const { return AudioSystem::popCount(channels())*((format()==AudioSystem::PCM_16_BIT)?sizeof(int16_t):sizeof(int8_t)); }
+    uint32_t    frameSize() const {
+        // only mono or stereo is supported for input sources
+        uint32_t numchannels = AudioSystem::popCount(channels() & (AudioSystem::CHANNEL_IN_STEREO | AudioSystem::CHANNEL_IN_MONO));
+        if (format() == AudioSystem::AMR_NB)
+        {
+          return numchannels * 32;
+        }
+        else if (format() == AudioSystem::EVRC)
+        {
+          return numchannels * 23;
+        }
+        else if (format() == AudioSystem::QCELP)
+        {
+          return numchannels * 35;
+        }
+        else if (format() == AudioSystem::AAC)
+        {
+          return  2048;
+        }
+        return numchannels*((format()==AudioSystem::PCM_16_BIT)?sizeof(int16_t):sizeof(int8_t));
+    }
 
     /** set the input gain for the audio driver. This method is for
      *  for future use */
@@ -193,6 +213,9 @@ public:
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
     virtual status_t    setVoiceVolume(float volume) = 0;
 
+    /** set the fm volume. Range is between 0.0 and 1.0 */
+    virtual status_t    setFmVolume(float volume) { return 0; }
+
     /**
      * set the audio volume for all audio activities other than voice call.
      * Range between 0.0 and 1.0. If any value other than NO_ERROR is returned,
@@ -226,6 +249,13 @@ public:
                                 uint32_t *channels=0,
                                 uint32_t *sampleRate=0,
                                 status_t *status=0) = 0;
+    /** This method creates and opens the audio hardware output
+     *  stream for tunnel audio decoding */
+    virtual AudioStreamOut* openOutputSession(
+                                uint32_t devices,
+                                int *format=0,
+                                status_t *status=0,
+                                int sessionId=-1) {return 0;};
     virtual    void        closeOutputStream(AudioStreamOut* out) = 0;
     /** This method creates and opens the audio hardware input stream */
     virtual AudioStreamIn* openInputStream(
