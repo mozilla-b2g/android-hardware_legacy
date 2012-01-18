@@ -90,6 +90,8 @@ public:
                                         uint32_t format = AudioSystem::FORMAT_DEFAULT,
                                         uint32_t channels = 0,
                                         AudioSystem::output_flags flags = AudioSystem::OUTPUT_FLAG_INDIRECT) = 0;
+
+#ifdef ENABLE_NEWER_AUDIO_INTERFACE_VTABLE
     // request a session appriate for tunnel mode/batch decoding session of the supplied stream type and parameters
     virtual audio_io_handle_t getSession(AudioSystem::stream_type stream,
                                         uint32_t format = AudioSystem::FORMAT_DEFAULT,
@@ -101,6 +103,8 @@ public:
     virtual void resumeSession(audio_io_handle_t output, AudioSystem::stream_type stream) {return;};
     // requests to release an ongoing tunnel mode/ batch decode session.
     virtual void releaseSession(audio_io_handle_t output) {return;};
+#endif
+
     // indicates to the audio policy manager that the output starts being used by corresponding stream.
     virtual status_t startOutput(audio_io_handle_t output,
                                  AudioSystem::stream_type stream,
@@ -176,6 +180,8 @@ public:
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     AudioSystem::output_flags flags) = 0;
+
+#ifdef ENABLE_NEWER_AUDIO_INTERFACE_VTABLE
     // opens an audio session with the requested parameters. The parameter values can indicate to use the default values
     // in case the audio policy manager has no specific requirements for the output being opened.
     // When the function returns, the parameter values reflect the actual values used by the audio hardware output stream.
@@ -187,6 +193,8 @@ public:
                                     int32_t  sessionId) {return 0;};
     // closes the output audio session. 
     virtual status_t closeSession(audio_io_handle_t output) {return 0;};
+#endif
+
     // creates a special output that is duplicated to the two outputs passed as arguments. The duplication is performed by
     // a special mixer thread in the AudioFlinger.
     virtual audio_io_handle_t openDuplicateOutput(audio_io_handle_t output1, audio_io_handle_t output2) = 0;
@@ -239,8 +247,10 @@ public:
                                      audio_io_handle_t srcOutput,
                                      audio_io_handle_t dstOutput) = 0;
 
+#ifdef ENABLE_NEWER_AUDIO_INTERFACE_VTABLE
     // set FM volume.
     virtual status_t setFmVolume(float volume, int delayMs = 0) { return 0; }
+#endif
 };
 
 extern "C" AudioPolicyInterface* createAudioPolicyManager(AudioPolicyClientInterface *clientInterface);

@@ -213,8 +213,10 @@ public:
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
     virtual status_t    setVoiceVolume(float volume) = 0;
 
+#ifdef ENABLE_NEWER_AUDIO_INTERFACE_VTABLE
     /** set the fm volume. Range is between 0.0 and 1.0 */
     virtual status_t    setFmVolume(float volume) { return 0; }
+#endif
 
     /**
      * set the audio volume for all audio activities other than voice call.
@@ -249,6 +251,8 @@ public:
                                 uint32_t *channels=0,
                                 uint32_t *sampleRate=0,
                                 status_t *status=0) = 0;
+
+#ifdef ENABLE_NEWER_AUDIO_INTERFACE_VTABLE
     /** This method creates and opens the audio hardware output
      *  stream for tunnel audio decoding */
     virtual AudioStreamOut* openOutputSession(
@@ -256,6 +260,8 @@ public:
                                 int *format=0,
                                 status_t *status=0,
                                 int sessionId=-1) {return 0;};
+#endif
+
     virtual    void        closeOutputStream(AudioStreamOut* out) = 0;
     /** This method creates and opens the audio hardware input stream */
     virtual AudioStreamIn* openInputStream(
