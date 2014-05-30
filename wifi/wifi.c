@@ -205,6 +205,8 @@ int wifi_load_driver()
         return 0;
     }
 
+    property_set(DRIVER_PROP_NAME, "loading");
+
     if (insmod(DRIVER_MODULE_PATH, DRIVER_MODULE_ARG) < 0)
         return -1;
 
@@ -220,7 +222,7 @@ int wifi_load_driver()
         if (property_get(DRIVER_PROP_NAME, driver_status, NULL)) {
             if (strcmp(driver_status, "ok") == 0)
                 return 0;
-            else if (strcmp(DRIVER_PROP_NAME, "failed") == 0) {
+            else if (strcmp(driver_status, "failed") == 0) {
                 wifi_unload_driver();
                 return -1;
             }
